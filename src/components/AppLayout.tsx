@@ -684,6 +684,27 @@ export default function AppLayout() {
     return sum;
   }, 0);
 
+  // Move won prospects to Records from the 1st day of the next month.
+  const shouldMoveWonProspectToRecords = (p: any) => {
+    const status = (p.status || '').toString().toLowerCase();
+    const pipelineStage = (p.pipeline_stage || '').toString().toLowerCase();
+    const isWon = p.current_stage_id === 14 || status === 'won' || pipelineStage === 'won';
+    if (!isWon) return false;
+
+    const changedAt = p.updated_at ? new Date(p.updated_at).getTime() : NaN;
+    if (Number.isNaN(changedAt)) {
+      return false;
+    }
+
+    const wonDate = new Date(changedAt);
+    const nextMonthStart = new Date(wonDate.getFullYear(), wonDate.getMonth() + 1, 1).getTime();
+    return Date.now() >= nextMonthStart;
+  };
+
+  // Won prospects stay in Prospects for the rest of their won month, then move on the 1st.
+  const activeProspects = prospects.filter((p) => !shouldMoveWonProspectToRecords(p));
+  const recordsWonProspects = prospects.filter((p) => shouldMoveWonProspectToRecords(p));
+
   const stats = {
     totalProspects: prospects.length,
     activeProjects: projects.filter(p => {
@@ -752,7 +773,7 @@ export default function AppLayout() {
         {activeTab === 'dashboard' && <DashboardView stats={stats} />}
         {activeTab === 'prospects' && (
           <ProspectsView 
-            prospects={prospects} 
+            prospects={activeProspects} 
             onAddProspect={handleAddProspect} 
             onUpdateProspect={handleUpdateProspect}
             onMoveStage={handleMoveStage}
@@ -801,7 +822,7 @@ export default function AppLayout() {
         {activeTab === 'client-portal' && <ClientPortalView clientData={clientData} />}
         {activeTab === 'database-health' && <DatabaseHealthDashboard />}
         {activeTab === 'leads' && <LeadsView />}
-        {activeTab === 'lost' && <LostView />}
+        {activeTab === 'lost' && <LostView wonProspects={recordsWonProspects} />}
         {activeTab === 'leave-requests' && <LeaveRequestsView />}
         {activeTab === 'payment-requests' && (
           <PaymentRequestsView

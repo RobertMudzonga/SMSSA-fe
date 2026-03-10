@@ -30,7 +30,23 @@ interface LostProspect {
   updated_at?: string;
 }
 
-export default function LostView() {
+interface WonProspectRecord {
+  id?: string;
+  prospect_id?: string;
+  first_name?: string;
+  last_name?: string;
+  deal_name?: string;
+  company?: string;
+  email?: string;
+  assigned_to_name?: string;
+  updated_at?: string;
+}
+
+interface RecordsViewProps {
+  wonProspects?: WonProspectRecord[];
+}
+
+export default function LostView({ wonProspects = [] }: RecordsViewProps) {
   const { user } = useAuth();
   const [lostLeads, setLostLeads] = useState<LostLead[]>([]);
   const [lostProspects, setLostProspects] = useState<LostProspect[]>([]);
@@ -44,6 +60,7 @@ export default function LostView() {
   useEffect(() => {
     fetchLostLeads();
     fetchLostProspects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchLostLeads = async () => {
@@ -164,6 +181,17 @@ export default function LostView() {
     );
   });
 
+  const filteredWonProspects = (wonProspects || []).filter((prospect: WonProspectRecord) => {
+    const searchLower = searchTerm.toLowerCase();
+    const prospectName = `${prospect.first_name || ''} ${prospect.last_name || ''}`.toLowerCase();
+    return (
+      prospectName.includes(searchLower) ||
+      (prospect.deal_name || '').toLowerCase().includes(searchLower) ||
+      (prospect.company || '').toLowerCase().includes(searchLower) ||
+      (prospect.email || '').toLowerCase().includes(searchLower)
+    );
+  });
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -225,8 +253,8 @@ export default function LostView() {
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Lost Records Recovery</h1>
-            <p className="text-gray-600">View and recover lost leads and prospects that were marked as lost.</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Records</h1>
+            <p className="text-gray-600">View and manage lost records and won prospects.</p>
           </div>
           <button
             onClick={() => { fetchLostLeads(); fetchLostProspects(); }}
@@ -252,12 +280,15 @@ export default function LostView() {
         </div>
 
         <Tabs defaultValue="leads" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsList className="grid w-full max-w-2xl grid-cols-3">
             <TabsTrigger value="leads">
               Lost Leads ({filteredLeads.length})
             </TabsTrigger>
             <TabsTrigger value="prospects">
               Lost Prospects ({filteredProspects.length})
+            </TabsTrigger>
+            <TabsTrigger value="won-prospects">
+              Won Prospects ({filteredWonProspects.length})
             </TabsTrigger>
           </TabsList>
 
@@ -424,6 +455,63 @@ export default function LostView() {
                           <RefreshCw className="w-4 h-4" />
                           Recover
                         </button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="won-prospects" className="mt-6">
+            {loading ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500">Loading won prospects...</p>
+              </div>
+            ) : filteredWonProspects.length === 0 ? (
+              <Card className="p-8 text-center">
+                <p className="text-gray-500">No won prospects found</p>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {filteredWonProspects.map((prospect: WonProspectRecord) => (
+                  <Card key={prospect.prospect_id || prospect.id} className="p-4 hover:shadow-lg transition-shadow">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900">
+                          {prospect.first_name || ''} {prospect.last_name || ''}
+                        </h3>
+                        {prospect.deal_name && (
+                          <p className="text-sm text-teal-600 font-medium mt-1">
+                            Deal: {prospect.deal_name}
+                          </p>
+                        )}
+                        {prospect.company && (
+                          <p className="text-sm text-gray-600 mt-1">{prospect.company}</p>
+                        )}
+                        {prospect.email && (
+                          <div className="mt-2 text-sm text-gray-600">
+                            <span className="flex items-center gap-1">
+                              <span>✉️</span>
+                              {prospect.email}
+                            </span>
+                          </div>
+                        )}
+                        {prospect.assigned_to_name && (
+                          <p className="text-xs text-gray-500 mt-2">
+                            Assigned to: {prospect.assigned_to_name}
+                          </p>
+                        )}
+                        {prospect.updated_at && (
+                          <p className="text-xs text-gray-400 mt-2">
+                            Updated: {formatDate(prospect.updated_at)}
+                          </p>
+                        )}
+                      </div>
+                      <div className="ml-4">
+                        <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                          Won
+                        </span>
                       </div>
                     </div>
                   </Card>

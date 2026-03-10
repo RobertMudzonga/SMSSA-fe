@@ -12,7 +12,7 @@ export default function Sidebar({ activeTab, onTabChange, isOpen = false, onClos
     { id: 'dashboard', label: 'Dashboard', icon: '📊' },
     { id: 'leads', label: 'Leads', icon: '🎯' },
     { id: 'prospects', label: 'Prospects', icon: '👥' },
-    { id: 'lost', label: 'Lost Records', icon: '🔍' },
+    { id: 'lost', label: 'Records', icon: '🔍' },
     { id: 'forecast', label: 'Forecast', icon: '📈' },
     { id: 'projects', label: 'Projects', icon: '📁' },
     { id: 'submissions', label: 'Submissions', icon: '📤' },
