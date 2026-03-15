@@ -1,4 +1,5 @@
 import { X } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SidebarProps {
   activeTab: string;
@@ -8,6 +9,17 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeTab, onTabChange, isOpen = false, onClose }: SidebarProps) {
+  const { user } = useAuth();
+
+  const displayName = user?.full_name || user?.email || 'Unknown User';
+  const displayTitle = user?.job_position || user?.role || 'Staff';
+  const initials = (displayName || 'U')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part: string) => part[0]?.toUpperCase())
+    .join('') || 'U';
+
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: '📊' },
     { id: 'leads', label: 'Leads', icon: '🎯' },
@@ -23,8 +35,6 @@ export default function Sidebar({ activeTab, onTabChange, isOpen = false, onClos
     { id: 'payment-requests', label: 'Payment Requests', icon: '💳' },
     { id: 'documents', label: 'Documents', icon: '📄' },
     { id: 'templates', label: 'Templates', icon: '📝' },
-    { id: 'analytics', label: 'Analytics', icon: '📊' },
-    { id: 'client-portal', label: 'Client Portal', icon: '🔐' },
     { id: 'database-health', label: 'Database Health', icon: '🔧' }
   ];
 
@@ -55,11 +65,11 @@ export default function Sidebar({ activeTab, onTabChange, isOpen = false, onClos
         <div className="p-4 border-t border-slate-700">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center">
-              <span className="text-white font-semibold">A</span>
+              <span className="text-white font-semibold">{initials}</span>
             </div>
             <div>
-              <p className="text-sm font-medium">Admin User</p>
-              <p className="text-xs text-gray-400">Consultant</p>
+              <p className="text-sm font-medium">{displayName}</p>
+              <p className="text-xs text-gray-400">{displayTitle}</p>
             </div>
           </div>
         </div>
