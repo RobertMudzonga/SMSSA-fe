@@ -19,6 +19,7 @@ export default function Sidebar({ activeTab, onTabChange, isOpen = false, onClos
     { id: 'legal-projects', label: 'Legal Projects', icon: '⚖️' },
     { id: 'employees', label: 'Employees', icon: '👔' },
     { id: 'leave-requests', label: 'Leave Requests', icon: '🏖️' },
+    { id: 'work-calendar', label: 'Work Calendar', icon: '🗓️' },
     { id: 'payment-requests', label: 'Payment Requests', icon: '💳' },
     { id: 'documents', label: 'Documents', icon: '📄' },
     { id: 'templates', label: 'Templates', icon: '📝' },

@@ -23,6 +23,7 @@ import LeaveRequestsView from './LeaveRequestsView';
 import ForecastView from './ForecastView';
 import SubmissionsView from './SubmissionsView';
 import LegalProjectsView from './LegalProjectsView';
+import WorkCalendarView from './WorkCalendarView';
 import { API_BASE } from '../lib/api';
 
 export default function AppLayout() {
@@ -824,6 +825,7 @@ export default function AppLayout() {
         {activeTab === 'leads' && <LeadsView />}
         {activeTab === 'lost' && <LostView wonProspects={recordsWonProspects} />}
         {activeTab === 'leave-requests' && <LeaveRequestsView />}
+        {activeTab === 'work-calendar' && <WorkCalendarView employees={employees} />}
         {activeTab === 'payment-requests' && (
           <PaymentRequestsView
             paymentRequests={paymentRequests}
