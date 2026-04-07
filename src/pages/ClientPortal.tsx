@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { API_BASE } from '@/lib/api';
-import { AlertCircle, Loader2, Lock, Eye, Upload, FileText, CheckCircle2, Clock, ChevronRight } from 'lucide-react';
+import { AlertCircle, Loader2, Lock, Eye, Upload, FileText, CheckCircle2, Clock, ChevronRight, MessageSquare } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import DocumentUploadZone from '@/components/DocumentUploadZone';
 import { CLIENT_UPLOADS_ENABLED } from '@/utils/documentSettings';
 import { useToast } from '@/hooks/use-toast';
+import ClientMessagesView from '@/components/ClientMessagesView';
 
 export default function ClientPortal() {
   const [searchParams] = useSearchParams();
@@ -30,7 +31,7 @@ export default function ClientPortal() {
   const [checklist, setChecklist] = useState<any[]>([]);
   
   // View state
-  const [activeTab, setActiveTab] = useState<'progress' | 'documents' | 'upload'>('progress');
+  const [activeTab, setActiveTab] = useState<'progress' | 'documents' | 'upload' | 'messages'>('progress');
   const [viewingDocument, setViewingDocument] = useState<any>(null);
   
   const { toast } = useToast();
@@ -282,6 +283,17 @@ export default function ClientPortal() {
               <Upload className="h-4 w-4 inline mr-2" />
               Upload Documents
             </button>
+            <button
+              onClick={() => setActiveTab('messages')}
+              className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
+                activeTab === 'messages'
+                  ? 'border-teal-600 text-teal-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <MessageSquare className="h-4 w-4 inline mr-2" />
+              Messages
+            </button>
           </div>
         </div>
       </div>
@@ -505,6 +517,13 @@ export default function ClientPortal() {
                 <p className="text-gray-600">No documents required at this time.</p>
               </Card>
             )}
+          </div>
+        )}
+
+        {/* Messages Tab */}
+        {activeTab === 'messages' && (
+          <div className="space-y-6">
+            <ClientMessagesView clientName={projectInfo?.client_name || 'Client'} />
           </div>
         )}
       </div>

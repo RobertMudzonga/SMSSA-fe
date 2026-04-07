@@ -90,7 +90,7 @@ interface LeadDetailModalProps {
   lead: any;
   isOpen: boolean;
   onClose: () => void;
-  onAddComment: (leadId: number, comment: string) => void;
+  onAddComment: (leadId: number, comment: string, reminderDate?: string) => void;
   onMarkLost: (leadId: number, reason: string) => void;
   onDelete: (leadId: number) => void;
   onAssignEmployee?: (leadId: number, employeeId: number) => void;
@@ -108,6 +108,7 @@ export default function LeadDetailModal({
   employees = []
 }: LeadDetailModalProps) {
   const [comment, setComment] = useState('');
+  const [reminderDate, setReminderDate] = useState('');
   const [lostReason, setLostReason] = useState('');
   const [showLostDialog, setShowLostDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -117,8 +118,9 @@ export default function LeadDetailModal({
 
   const handleAddComment = () => {
     if (comment.trim()) {
-      onAddComment(lead.lead_id, comment);
+      onAddComment(lead.lead_id, comment, reminderDate);
       setComment('');
+      setReminderDate('');
     }
   };
 
@@ -351,10 +353,26 @@ export default function LeadDetailModal({
             <Textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="Add a note or comment about this lead..."
-              className="w-full mb-2"
+              placeholder="Add a note or comment about this lead... (e.g., 'Call on 15 Apr' or 'Follow-up next Monday')"
+              className="w-full mb-3"
               rows={3}
             />
+            
+            {/* Follow-up Reminder Date */}
+            <div className="mb-3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <Calendar className="w-4 h-4 inline mr-1" />
+                Set Follow-up Reminder (Optional)
+              </label>
+              <input 
+                type="date" 
+                value={reminderDate} 
+                onChange={e => setReminderDate(e.target.value)} 
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              />
+              <p className="text-xs text-gray-500 mt-1">The system will also parse dates mentioned in your note (e.g., "call on 15 Apr")</p>
+            </div>
+            
             <Button
               onClick={handleAddComment}
               disabled={!comment.trim()}

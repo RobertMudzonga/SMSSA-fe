@@ -162,6 +162,7 @@ export default function ProspectDetailModal({
   const { user } = useAuth();
   const [notes, setNotes] = useState('');
   const [newComment, setNewComment] = useState('');
+  const [reminderDate, setReminderDate] = useState('');
   const [contactName, setContactName] = useState(prospect?.name || '');
   const [dealName, setDealName] = useState(prospect?.deal_name || '');
   const [email, setEmail] = useState(prospect?.email || '');
@@ -290,6 +291,7 @@ export default function ProspectDetailModal({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           comment: newComment,
+          reminder_date: reminderDate || null,
           user_id: user?.id || null,
           user_name: user?.full_name || user?.email || 'Unknown User'
         }),
@@ -302,6 +304,7 @@ export default function ProspectDetailModal({
       const updatedProspect = await response.json();
       setNotes(updatedProspect.notes || '');
       setNewComment('');
+      setReminderDate('');
       toast({ title: 'Comment added successfully' });
     } catch (err) {
       console.error('Error adding comment:', err);
@@ -477,10 +480,26 @@ export default function ProspectDetailModal({
               <textarea 
                 value={newComment} 
                 onChange={e => setNewComment(e.target.value)} 
-                placeholder="Add a note or comment about this prospect..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2"
+                placeholder="Add a note or comment about this prospect... (e.g., 'Call on 15 Apr' or 'Follow-up next Monday')"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3"
                 rows={3}
               />
+              
+              {/* Follow-up Reminder Date */}
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <Calendar className="w-4 h-4 inline mr-1" />
+                  Set Follow-up Reminder (Optional)
+                </label>
+                <input 
+                  type="date" 
+                  value={reminderDate} 
+                  onChange={e => setReminderDate(e.target.value)} 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1">The system will also parse dates mentioned in your note (e.g., "call on 15 Apr")</p>
+              </div>
+              
               <button 
                 onClick={handleAddComment}
                 disabled={!newComment.trim()}

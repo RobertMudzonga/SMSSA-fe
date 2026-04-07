@@ -142,6 +142,7 @@ export default function LegalProjectsView() {
   const [caseManagerFilter, setCaseManagerFilter] = useState<string>('all');
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [importingCases, setImportingCases] = useState(false);
+  const [corporates, setCorporates] = useState<any[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editCase, setEditCase] = useState<{
     case_id: number;
@@ -153,6 +154,7 @@ export default function LegalProjectsView() {
     assigned_case_manager_id: string;
     assigned_paralegal_id: string;
     case_status: 'active' | 'closed' | 'lost' | 'settled' | 'appealing' | 'on_hold';
+    corporate_client_id: string;
     notes: string;
   } | null>(null);
   const [updatingCase, setUpdatingCase] = useState(false);
@@ -172,6 +174,7 @@ export default function LegalProjectsView() {
     vfs_center: '',
     priority: 'medium' as const,
     assigned_case_manager_id: '',
+    corporate_client_id: '',
     notes: ''
   });
 
@@ -179,6 +182,7 @@ export default function LegalProjectsView() {
     loadCases();
     loadStats();
     loadEmployees();
+    loadCorporates();
   }, []);
 
   const loadCases = async () => {
@@ -217,6 +221,18 @@ export default function LegalProjectsView() {
       }
     } catch (error) {
       console.error('Error loading employees:', error);
+    }
+  };
+  
+  const loadCorporates = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/corporate-clients`);
+      if (response.ok) {
+        const data = await response.json();
+        setCorporates(data.corporate_clients || []);
+      }
+    } catch (error) {
+      console.error('Error loading corporates:', error);
     }
   };
 
@@ -297,7 +313,8 @@ export default function LegalProjectsView() {
         body: JSON.stringify({
           ...newCase,
           vfs_center: newCase.vfs_center || null,
-          assigned_case_manager_id: newCase.assigned_case_manager_id ? parseInt(newCase.assigned_case_manager_id) : null
+          assigned_case_manager_id: newCase.assigned_case_manager_id ? parseInt(newCase.assigned_case_manager_id) : null,
+          corporate_client_id: newCase.corporate_client_id ? parseInt(newCase.corporate_client_id) : null
         })
       });
 
@@ -337,6 +354,7 @@ export default function LegalProjectsView() {
       assigned_case_manager_id: caseItem.assigned_case_manager_id ? String(caseItem.assigned_case_manager_id) : 'none',
       assigned_paralegal_id: caseItem.assigned_paralegal_id ? String(caseItem.assigned_paralegal_id) : 'none',
       case_status: caseItem.case_status || 'active',
+      corporate_client_id: caseItem.corporate_client_id ? String(caseItem.corporate_client_id) : 'none',
       notes: caseItem.notes || ''
     });
     setIsEditDialogOpen(true);
@@ -358,6 +376,7 @@ export default function LegalProjectsView() {
           assigned_case_manager_id: editCase.assigned_case_manager_id && editCase.assigned_case_manager_id !== 'none' ? parseInt(editCase.assigned_case_manager_id) : null,
           assigned_paralegal_id: editCase.assigned_paralegal_id && editCase.assigned_paralegal_id !== 'none' ? parseInt(editCase.assigned_paralegal_id) : null,
           case_status: editCase.case_status,
+          corporate_client_id: editCase.corporate_client_id && editCase.corporate_client_id !== 'none' ? parseInt(editCase.corporate_client_id) : null,
           notes: editCase.notes || null
         })
       });
@@ -996,6 +1015,20 @@ export default function LegalProjectsView() {
                     <SelectContent>
                       {employees.filter(e => e.department === 'Legal' || e.job_position?.toLowerCase().includes('manager')).map(e => (
                         <SelectItem key={e.id} value={String(e.id)}>{e.full_name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Corporate Client (Optional)</Label>
+                  <Select value={newCase.corporate_client_id} onValueChange={(v) => setNewCase({...newCase, corporate_client_id: v})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select corporate client" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No Corporate Client</SelectItem>
+                      {corporates.map(corp => (
+                        <SelectItem key={corp.corporate_id} value={String(corp.corporate_id)}>{corp.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -1757,6 +1790,21 @@ export default function LegalProjectsView() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Corporate Client</Label>
+                <Select value={editCase.corporate_client_id} onValueChange={(v) => setEditCase({...editCase, corporate_client_id: v})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select corporate client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No Corporate Client</SelectItem>
+                    {corporates.map(corp => (
+                      <SelectItem key={corp.corporate_id} value={String(corp.corporate_id)}>{corp.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="space-y-2">

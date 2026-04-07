@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { X } from 'lucide-react';
+import { X, Calendar } from 'lucide-react';
 
 interface AddProspectModalProps {
   isOpen: boolean;
@@ -17,7 +17,8 @@ export default function AddProspectModal({ isOpen, onClose, onSubmit }: AddProsp
     phone: '',
     lead_source: '',
     pipeline_stage: 'opportunity',
-    notes: ''
+    notes: '',
+    reminder_date: ''
   });
 
   if (!isOpen) return null;
@@ -30,7 +31,7 @@ export default function AddProspectModal({ isOpen, onClose, onSubmit }: AddProsp
     setIsSubmitting(true);
     try {
       await Promise.resolve(onSubmit(formData));
-      setFormData({ name: '', email: '', phone: '', lead_source: '', pipeline_stage: 'opportunity', notes: '' });
+      setFormData({ name: '', email: '', phone: '', lead_source: '', pipeline_stage: 'opportunity', notes: '', reminder_date: '' });
       onClose();
     } catch (error: any) {
       console.error('Error adding prospect:', error);
@@ -107,6 +108,19 @@ export default function AddProspectModal({ isOpen, onClose, onSubmit }: AddProsp
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               rows={3}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              <Calendar className="w-4 h-4 inline mr-1" />
+              Follow-up Reminder Date (Optional)
+            </label>
+            <input
+              type="date"
+              value={formData.reminder_date}
+              onChange={(e) => setFormData({ ...formData, reminder_date: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
           </div>
 

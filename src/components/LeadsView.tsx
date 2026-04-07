@@ -320,13 +320,14 @@ export default function ColdLeadsKanbanApp() {
     };
 
     // --- Lead Detail Modal Handlers ---
-    const handleAddComment = async (leadId, comment) => {
+    const handleAddComment = async (leadId, comment, reminderDate) => {
         try {
             const response = await fetch(`${API_BASE}/leads/${leadId}/comment`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     comment,
+                    reminder_date: reminderDate || null,
                     user_id: user?.id || null,
                     user_name: user?.full_name || user?.email || 'Unknown User'
                 }),

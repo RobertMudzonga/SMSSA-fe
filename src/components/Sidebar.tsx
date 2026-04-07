@@ -22,6 +22,7 @@ export default function Sidebar({ activeTab, onTabChange, isOpen = false, onClos
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+    { id: 'corporate-client-dashboard', label: 'Corporate Client Dashboard', icon: '🏢' },
     { id: 'leads', label: 'Leads', icon: '🎯' },
     { id: 'prospects', label: 'Prospects', icon: '👥' },
     { id: 'lost', label: 'Records', icon: '🔍' },

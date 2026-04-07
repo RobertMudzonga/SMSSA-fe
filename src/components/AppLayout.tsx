@@ -13,6 +13,7 @@ import ClientPortalView from './ClientPortalView';
 import { EmployeesView } from './EmployeesView';
 import DocumentChecklistView from './DocumentChecklistView';
 import TemplateLibraryView from './TemplateLibraryView';
+import CorporateClientDashboard from './CorporateClientDashboard';
 import DatabaseHealthDashboard from './DatabaseHealthDashboard';
 import { AnalyticsView } from './AnalyticsView';
 import ProjectView from './ProjectView';
@@ -821,6 +822,7 @@ export default function AppLayout() {
         {activeTab === 'templates' && <TemplateLibraryView />}
         {activeTab === 'analytics' && <AnalyticsView />}
         {activeTab === 'client-portal' && <ClientPortalView clientData={clientData} />}
+        {activeTab === 'corporate-client-dashboard' && <CorporateClientDashboard />}
         {activeTab === 'database-health' && <DatabaseHealthDashboard />}
         {activeTab === 'leads' && <LeadsView />}
         {activeTab === 'lost' && <LostView wonProspects={recordsWonProspects} />}

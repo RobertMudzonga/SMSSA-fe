@@ -12,7 +12,24 @@ export function apiUrl(path: string) {
 
 export async function apiFetch(path: string, options?: RequestInit) {
   const url = apiUrl(path);
-  return fetch(url, options);
+  
+  // Add user email from localStorage to headers for authorization checks
+  const headers = new Headers(options?.headers || {});
+  try {
+    const userEmail = localStorage.getItem('userEmail');
+    if (userEmail && !headers.has('x-user-email')) {
+      headers.set('x-user-email', userEmail);
+    }
+  } catch (e) {
+    // Ignore localStorage errors
+  }
+  
+  const fetchOptions: RequestInit = {
+    ...options,
+    headers
+  };
+  
+  return fetch(url, fetchOptions);
 }
 
 // Patch global `fetch` in the browser so existing code that calls
@@ -27,6 +44,17 @@ if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
       // eslint-disable-next-line @typescript-eslint/ban-types
       window.fetch = (input: RequestInfo, init?: RequestInit) => {
         try {
+          // Add user email header for authorization checks
+          const headers = new Headers(init?.headers || {});
+          try {
+            const userEmail = localStorage.getItem('userEmail');
+            if (userEmail && !headers.has('x-user-email')) {
+              headers.set('x-user-email', userEmail);
+            }
+          } catch (e) {
+            // Ignore localStorage errors
+          }
+          
           if (typeof input === 'string') {
             // Rewrite any path starting with / to use API_BASE
             if (input.startsWith('/') && !input.startsWith('//')) {
@@ -41,10 +69,12 @@ if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
               input = new Request(base + reqUrl, input);
             }
           }
+          
+          return originalFetch(input, { ...init, headers } as any);
         } catch (e) {
           // fallback to original input if anything goes wrong
+          return originalFetch(input, init as any);
         }
-        return originalFetch(input, init as any);
       };
     }
   } catch (e) {
