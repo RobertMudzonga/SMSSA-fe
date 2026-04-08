@@ -399,7 +399,7 @@ export default function ColdLeadsKanbanApp() {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    user_id: user?.id || null,
+                    user_id: user?.employee_id || user?.id || null,
                     user_name: user?.full_name || user?.email || 'System'
                 }),
             });
@@ -504,14 +504,16 @@ export default function ColdLeadsKanbanApp() {
                             <RefreshCw className="w-4 h-4" />
                             <span className="text-sm">Refresh</span>
                         </button>
-                        <button
-                            onClick={() => setShowClearConfirm(true)}
-                            disabled={leads.length === 0}
-                            className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                        >
-                            <Trash2 className="w-4 h-4" />
-                            <span className="text-sm">Clear</span>
-                        </button>
+                        {user?.is_super_admin && (
+                            <button
+                                onClick={() => setShowClearConfirm(true)}
+                                disabled={leads.length === 0}
+                                className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                <span className="text-sm">Clear</span>
+                            </button>
+                        )}
                     </div>
                 </div>
                 
