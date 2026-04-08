@@ -2,10 +2,9 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Building2, Users, FileText, MessageSquare, Loader2, Lock, AlertCircle, Scale, Calendar, Plus, Upload, Briefcase } from 'lucide-react';
+import { Building2, Users, FileText, Loader2, Lock, AlertCircle, Scale, Calendar, Plus, Upload, Briefcase } from 'lucide-react';
 import { API_BASE } from '@/lib/api';
 import CorporateReportsView from '@/components/CorporateReportsView';
-import CorporateMessagesView from '@/components/CorporateMessagesView';
 import EmployeeVisasTracker from '@/components/EmployeeVisasTracker';
 import CaseCreationModalCorporate from '@/components/CaseCreationModalCorporate';
 import DocumentUploadCorporate from '@/components/DocumentUploadCorporate';
@@ -29,7 +28,7 @@ export default function CorporateDashboard() {
   const [casesLoading, setCasesLoading] = useState(false);
   
   // View state
-  const [activeTab, setActiveTab] = useState<'overview' | 'cases' | 'visas' | 'reports' | 'messages'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'cases' | 'visas' | 'reports'>('overview');
   
   // Modal states
   const [showCaseCreationModal, setShowCaseCreationModal] = useState(false);
@@ -247,15 +246,6 @@ export default function CorporateDashboard() {
             >
               <FileText className="h-4 w-4" />
               Reports
-            </button>
-            <button
-              onClick={() => setActiveTab('messages')}
-              className={`flex items-center gap-2 px-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'messages' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <MessageSquare className="h-4 w-4" />
-              Messages
             </button>
           </div>
         </div>
@@ -481,16 +471,7 @@ export default function CorporateDashboard() {
           </div>
         )}
 
-        {/* MESSAGES TAB */}
-        {activeTab === 'messages' && (
-          <div className="space-y-6">
-             <CorporateMessagesView 
-               token={token || ''} 
-               managerName={companyInfo?.primary_contact_name}
-               managerRole={companyInfo?.primary_contact_role}
-             />
-          </div>
-        )}
+
       </div>
 
       {/* Modals */}
