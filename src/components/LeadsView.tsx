@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { PhoneCall, Mail, UserCheck, RefreshCw, AlertTriangle, Loader, Search, Send } from 'lucide-react';
+import { PhoneCall, Mail, UserCheck, RefreshCw, AlertTriangle, Loader, Search, Send, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Progress } from './ui/progress';
@@ -153,6 +153,8 @@ export default function ColdLeadsKanbanApp() {
     const [selectedLead, setSelectedLead] = useState(null);
     const [filterEmployeeId, setFilterEmployeeId] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [showClearConfirm, setShowClearConfirm] = useState(false);
+    const [isClearing, setIsClearing] = useState(false);
 
     // --- Helper to show toasts ---
     const showToast = useCallback((message, type = 'success') => {
@@ -390,6 +392,34 @@ export default function ColdLeadsKanbanApp() {
         }
     };
 
+    const handleClearAllLeads = async () => {
+        setIsClearing(true);
+        try {
+            const response = await fetch(`${API_BASE}/leads/clear-all`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: user?.id || null,
+                    user_name: user?.full_name || user?.email || 'System'
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to clear leads');
+            }
+
+            const result = await response.json();
+            setLeads([]);
+            showToast(result.message || 'All leads cleared and marked as lost.', 'success');
+        } catch (err) {
+            console.error('Error clearing leads:', err);
+            showToast('Failed to clear leads. Please try again.', 'error');
+        } finally {
+            setIsClearing(false);
+            setShowClearConfirm(false);
+        }
+    };
+
     const handleAssignEmployee = async (leadId, employeeId) => {
         try {
             const response = await fetch(`${API_BASE}/leads/${leadId}/assign`, {
@@ -474,6 +504,14 @@ export default function ColdLeadsKanbanApp() {
                             <RefreshCw className="w-4 h-4" />
                             <span className="text-sm">Refresh</span>
                         </button>
+                        <button
+                            onClick={() => setShowClearConfirm(true)}
+                            disabled={leads.length === 0}
+                            className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            <span className="text-sm">Clear</span>
+                        </button>
                     </div>
                 </div>
                 
@@ -534,6 +572,43 @@ export default function ColdLeadsKanbanApp() {
                     type={toast.type} 
                     onClose={() => setToast(null)} 
                 />
+            )}
+
+            {/* Clear All Confirmation Dialog */}
+            {showClearConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                                <AlertTriangle className="w-5 h-5 text-red-600" />
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900">Clear All Leads?</h3>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-6">
+                            This will mark <strong>all {leads.length} active lead{leads.length !== 1 ? 's' : ''}</strong> as lost with the reason <em>"does not qualify"</em>. This action cannot be undone.
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowClearConfirm(false)}
+                                disabled={isClearing}
+                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleClearAllLeads}
+                                disabled={isClearing}
+                                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {isClearing ? (
+                                    <><Loader className="w-4 h-4 animate-spin" /> Clearing...</>
+                                ) : (
+                                    <><Trash2 className="w-4 h-4" /> Yes, Clear All</>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Lead Detail Modal */}
