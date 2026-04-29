@@ -39,7 +39,22 @@ interface VisaType {
   description: string;
 }
 
-const CASE_TYPES = ['work_permit', 'business_visa', 'temporary_residence', 'relative_sponsorship', 'study_permit'];
+const CASE_TYPES = [
+  'work_permit',
+  'business_visa',
+  'temporary_residence',
+  'relative_sponsorship',
+  'study_permit',
+  'intra_company_transfer_work_visa'
+];
+const CASE_TYPE_LABELS: Record<string, string> = {
+  work_permit: 'Work Permit',
+  business_visa: 'Business Visa',
+  temporary_residence: 'Temporary Residence',
+  relative_sponsorship: 'Relative Sponsorship',
+  study_permit: 'Study Permit',
+  intra_company_transfer_work_visa: 'Intra Company Transfer Work Visa'
+};
 const PROJECT_STATUSES = ['active', 'pending_approval', 'completed', 'on_hold', 'rejected'];
 const PRIORITIES = [
   { value: 'urgent', label: 'Urgent', color: 'bg-red-100 text-red-800' },
@@ -370,7 +385,7 @@ export default function ProjectFormModal({
                 <option value="">Select visa type...</option>
                 {CASE_TYPES.map(type => (
                   <option key={type} value={type}>
-                    {type.replace(/_/g, ' ').toUpperCase()}
+                    {CASE_TYPE_LABELS[type] || type.replace(/_/g, ' ').toUpperCase()}
                   </option>
                 ))}
               </select>
