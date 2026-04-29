@@ -174,6 +174,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit, clientId
             <option>Prohibition Upliftment</option>
             <option>Proof of Permanent Residence</option>
             <option>Citizenship</option>
+            <option>Inta Company Transfer Work Visa</option>
 
           </select>
           <select
