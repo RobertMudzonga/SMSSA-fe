@@ -26,7 +26,8 @@ export default function AddPaymentRequestModal({ isOpen, onClose, onSubmit }: Ad
     amount: '',
     description: '',
     due_date: '',
-    is_urgent: false,
+    priority: 'Medium Priority',
+    comment: '',
   });
 
   useEffect(() => {
@@ -70,7 +71,7 @@ export default function AddPaymentRequestModal({ isOpen, onClose, onSubmit }: Ad
         requester_id: parseInt(formData.requester_id),
         requested_by: user?.user_id || null,
       }));
-      setFormData({ requester_id: '', amount: '', description: '', due_date: '', is_urgent: false });
+      setFormData({ requester_id: '', amount: '', description: '', due_date: '', priority: 'Medium Priority', comment: '' });
       onClose();
     } catch (error: any) {
       console.error('Error adding payment request:', error);
@@ -82,15 +83,15 @@ export default function AddPaymentRequestModal({ isOpen, onClose, onSubmit }: Ad
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-md">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+      <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] flex flex-col">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
           <h2 className="text-xl font-bold text-gray-900">New Payment Request</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Requester *</label>
             <select
@@ -145,20 +146,31 @@ export default function AddPaymentRequestModal({ isOpen, onClose, onSubmit }: Ad
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="is_urgent"
-              checked={formData.is_urgent}
-              onChange={(e) => setFormData({ ...formData, is_urgent: e.target.checked })}
-              className="w-4 h-4 text-red-600 border-gray-300 rounded"
-            />
-            <label htmlFor="is_urgent" className="text-sm font-medium text-gray-700">
-              Mark as urgent
-            </label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Priority Level *</label>
+            <select
+              value={formData.priority}
+              onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            >
+              <option value="Low Priority">Low Priority</option>
+              <option value="Medium Priority">Medium Priority</option>
+              <option value="High Priority">High Priority</option>
+            </select>
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Approver Comments</label>
+            <textarea
+              value={formData.comment}
+              onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              rows={3}
+              placeholder="Additional context for the approver (optional)"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4 mt-2 border-t border-gray-200 -mx-6 px-6 py-4 bg-gray-50">
             <button
               type="button"
               onClick={onClose}

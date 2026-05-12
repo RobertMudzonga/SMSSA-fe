@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Clock, AlertCircle, CheckCircle, XCircle, DollarSign } from 'lucide-react';
+import { Plus, Clock, CheckCircle, XCircle, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import AddPaymentRequestModal from './AddPaymentRequestModal';
@@ -13,7 +13,8 @@ interface PaymentRequest {
   amount: string;
   description: string;
   due_date: string;
-  is_urgent: boolean;
+  priority: 'High Priority' | 'Medium Priority' | 'Low Priority';
+  comment?: string;
   status: 'pending' | 'approved' | 'rejected' | 'paid';
   approved_by?: number;
   approved_by_name?: string;
@@ -76,6 +77,19 @@ export default function PaymentRequestsView({
         return <Badge className="bg-red-100 text-red-800"><XCircle className="w-3 h-3 mr-1" />Rejected</Badge>;
       default:
         return <Badge>{status}</Badge>;
+    }
+  };
+
+  const getPriorityBadge = (priority: string) => {
+    switch (priority) {
+      case 'High Priority':
+        return <Badge className="bg-red-100 text-red-800 font-semibold">⚡ High</Badge>;
+      case 'Medium Priority':
+        return <Badge className="bg-orange-100 text-orange-800">● Medium</Badge>;
+      case 'Low Priority':
+        return <Badge className="bg-blue-100 text-blue-800">○ Low</Badge>;
+      default:
+        return <Badge>{priority}</Badge>;
     }
   };
 
@@ -187,8 +201,10 @@ export default function PaymentRequestsView({
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Requester Comments</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Requested By</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
@@ -197,18 +213,18 @@ export default function PaymentRequestsView({
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredRequests.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
                   No payment requests found
                 </td>
               </tr>
             ) : (
               filteredRequests.map((pr) => (
-                <tr key={pr.payment_request_id} className={pr.is_urgent ? 'bg-red-50' : ''}>
+                <tr key={pr.payment_request_id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      {getStatusBadge(pr.status)}
-                      {pr.is_urgent && <AlertCircle className="w-4 h-4 text-red-600" />}
-                    </div>
+                    {getStatusBadge(pr.status)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {getPriorityBadge(pr.priority)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap font-semibold">
                     {formatCurrency(pr.amount)}
@@ -220,6 +236,15 @@ export default function PaymentRequestsView({
                         <p className="text-xs text-red-600 mt-1">Reason: {pr.rejection_reason}</p>
                       )}
                     </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    {pr.comment ? (
+                      <div className="max-w-xs bg-blue-50 border border-blue-200 rounded p-2">
+                        <p className="text-sm text-gray-900">{pr.comment}</p>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-400 italic">No comments</p>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {pr.requester_name}
