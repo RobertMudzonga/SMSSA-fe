@@ -255,6 +255,11 @@ export default function ProjectView({ projectId, onClose, onDataChange }: Projec
         <div>
           <h2 className="text-2xl font-bold">Project: {project?.project_name}</h2>
           <p className="text-sm text-gray-600">Client: {project?.client_name}</p>
+          {project?.sharepoint_folder_url && (
+            <p className="text-sm text-blue-600 mt-1 break-words">
+              SharePoint Upload: <a href={project.sharepoint_folder_url} target="_blank" rel="noreferrer" className="underline">Open folder</a>
+            </p>
+          )}
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setShowClientPortalModal(true)}>
@@ -513,6 +518,17 @@ export default function ProjectView({ projectId, onClose, onDataChange }: Projec
                   <label className="text-sm">Start Date</label>
                   <input type="date" className="w-full p-2 border rounded" value={formatForDateInput(project?.start_date || '')} onChange={(e) => setProject({ ...project, start_date: e.target.value })} />
                 </div>
+                <div className="md:col-span-2">
+                  <label className="text-sm">SharePoint Upload Folder URL</label>
+                  <input
+                    type="url"
+                    className="w-full p-2 border rounded"
+                    value={project?.sharepoint_folder_url || ''}
+                    onChange={(e) => setProject({ ...project, sharepoint_folder_url: e.target.value })}
+                    placeholder="https://yourorg.sharepoint.com/sites/..."
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Optional: route project client portal uploads to this SharePoint folder.</p>
+                </div>
                 <div>
                   <label className="text-sm">Balance Due</label>
                   <input type="number" step="0.01" className="w-full p-2 border rounded" value={project?.payment_amount || ''} onChange={(e) => setProject({ ...project, payment_amount: e.target.value })} />
@@ -562,6 +578,7 @@ export default function ProjectView({ projectId, onClose, onDataChange }: Projec
                       case_type: project?.case_type,
                       priority: project?.priority,
                       start_date: project?.start_date,
+                      sharepoint_folder_url: project?.sharepoint_folder_url || null,
                       payment_amount: project?.payment_amount,
                       project_manager_id: project?.project_manager_id,
                       project_manager_id_2: project?.project_manager_id_2,

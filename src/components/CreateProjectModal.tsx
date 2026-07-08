@@ -17,6 +17,7 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit, clientId
     priority: 'medium',
     start_date: '',
     payment_amount: '',
+    sharepoint_folder_url: '',
     project_manager_id: '' as number | '',
     project_manager_id_2: '' as number | ''
   });
@@ -71,8 +72,14 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit, clientId
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ ...formData, client_id: clientId, project_manager_id: formData.project_manager_id || null, project_manager_id_2: formData.project_manager_id_2 || null });
-    setFormData({ project_name: '', client_name: '', client_email: '', case_type: 'Work Visa', priority: 'medium', start_date: '', payment_amount: '', project_manager_id: '', project_manager_id_2: '' });
+    onSubmit({
+      ...formData,
+      client_id: clientId,
+      sharepoint_folder_url: formData.sharepoint_folder_url?.trim() || null,
+      project_manager_id: formData.project_manager_id || null,
+      project_manager_id_2: formData.project_manager_id_2 || null
+    });
+    setFormData({ project_name: '', client_name: '', client_email: '', case_type: 'Work Visa', priority: 'medium', start_date: '', payment_amount: '', sharepoint_folder_url: '', project_manager_id: '', project_manager_id_2: '' });
   };
 
   return (
@@ -104,6 +111,16 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit, clientId
             className="w-full px-3 py-2 border rounded-lg"
             required
           />
+          <input
+            type="url"
+            placeholder="SharePoint Upload Folder URL (optional)"
+            value={formData.sharepoint_folder_url}
+            onChange={(e) => setFormData({...formData, sharepoint_folder_url: e.target.value})}
+            className="w-full px-3 py-2 border rounded-lg"
+          />
+          <p className="text-xs text-gray-500">
+            Optional: clients can upload documents to this SharePoint folder instead of in-app upload.
+          </p>
           <input
             type="date"
             placeholder="Start Date"

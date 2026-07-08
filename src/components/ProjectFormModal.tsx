@@ -19,6 +19,7 @@ interface Project {
   project_manager_id: number | null;
   payment_amount: number | null;
   start_date: string | null;
+  sharepoint_folder_url?: string | null;
 }
 
 interface CorporateClient {
@@ -92,6 +93,7 @@ export default function ProjectFormModal({
     project_manager_id: '',
     payment_amount: '',
     start_date: '',
+    sharepoint_folder_url: '',
     notes: ''
   });
 
@@ -155,6 +157,7 @@ export default function ProjectFormModal({
         project_manager_id: projectData.project_manager_id?.toString() || '',
         payment_amount: projectData.payment_amount?.toString() || '',
         start_date: projectData.start_date ? projectData.start_date.split('T')[0] : '',
+        sharepoint_folder_url: projectData.sharepoint_folder_url || '',
         notes: ''
       });
     } else {
@@ -170,6 +173,7 @@ export default function ProjectFormModal({
         project_manager_id: '',
         payment_amount: '',
         start_date: '',
+        sharepoint_folder_url: '',
         notes: ''
       });
     }
@@ -201,9 +205,9 @@ export default function ProjectFormModal({
       newErrors.payment_amount = 'Payment amount must be a valid number';
     }
 
-    if (formData.start_date && new Date(formData.start_date) > new Date()) {
-      newErrors.start_date = 'Start date cannot be in the future';
-    }
+      if (formData.sharepoint_folder_url && !/^https?:\/\//i.test(formData.sharepoint_folder_url)) {
+        newErrors.sharepoint_folder_url = 'SharePoint URL must be a valid address';
+      }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -242,6 +246,7 @@ export default function ProjectFormModal({
         project_manager_id: formData.project_manager_id ? parseInt(formData.project_manager_id) : null,
         payment_amount: formData.payment_amount ? parseFloat(formData.payment_amount) : null,
         start_date: formData.start_date || null,
+        sharepoint_folder_url: formData.sharepoint_folder_url?.trim() || null,
         corporate_client_id: corporateClient.id
       };
 
@@ -395,6 +400,28 @@ export default function ProjectFormModal({
                 </p>
               )}
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              SharePoint Upload Folder URL
+            </label>
+            <Input
+              value={formData.sharepoint_folder_url}
+              onChange={(e) =>
+                setFormData({ ...formData, sharepoint_folder_url: e.target.value })
+              }
+              placeholder="https://yourorg.sharepoint.com/sites/..."
+              className={errors.sharepoint_folder_url ? 'border-red-500' : ''}
+            />
+            {errors.sharepoint_folder_url && (
+              <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" /> {errors.sharepoint_folder_url}
+              </p>
+            )}
+            <p className="text-xs text-gray-500 mt-1">
+              When set, client portal uploads for this project will be routed to the configured SharePoint folder.
+            </p>
           </div>
 
           {/* Status & Priority */}

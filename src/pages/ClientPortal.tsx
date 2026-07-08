@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { API_BASE } from '@/lib/api';
-import { AlertCircle, Loader2, Lock, Eye, Upload, FileText, CheckCircle2, Clock, ChevronRight, MessageSquare } from 'lucide-react';
+import { AlertCircle, Loader2, Lock, Eye, Upload, FileText, CheckCircle2, Clock, ChevronRight, MessageSquare, FolderOpen } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -104,7 +104,7 @@ export default function ClientPortal() {
       }
       
       setIsAuthenticated(true);
-      setProjectInfo(json.project || projectInfo);
+      setProjectInfo((prev: any) => ({ ...(prev || {}), ...(json.project || {}) }));
       await loadPortalData(token);
     } catch (err) {
       setLoginError('An error occurred. Please try again.');
@@ -120,7 +120,7 @@ export default function ClientPortal() {
       const progressJson = await progressResp.json().catch(() => null);
       if (progressResp.ok && progressJson) {
         setProgress(progressJson);
-        setProjectInfo(progressJson.project || projectInfo);
+        setProjectInfo((prev: any) => ({ ...(prev || {}), ...(progressJson.project || {}) }));
       }
       
       // Load documents
@@ -233,6 +233,11 @@ export default function ClientPortal() {
   const checklistProgress = checklist.length > 0 
     ? Math.round((checklist.filter(item => item.is_received).length / checklist.length) * 100)
     : 0;
+  const sharepointFolderUrl = progress?.project?.sharepoint_folder_url
+    || projectInfo?.sharepoint_folder_url
+    || progress?.project?.corporate_sharepoint_folder_url
+    || projectInfo?.corporate_sharepoint_folder_url
+    || null;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -452,8 +457,40 @@ export default function ClientPortal() {
                 </div>
               </div>
             </Card>
-            
-            {categories.map(category => {
+
+            {sharepointFolderUrl ? (
+              <Card className="p-6 bg-blue-50 border-blue-200">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-start gap-3">
+                    <FolderOpen className="h-6 w-6 text-blue-600 flex-shrink-0" />
+                    <div>
+                      <h3 className="font-semibold text-blue-900">Upload via SharePoint</h3>
+                      <p className="text-sm text-blue-800">
+                        This project is configured to receive documents through a secure Microsoft SharePoint folder. Please click the link below to upload your files.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="text-sm text-gray-700 break-words">
+                      <strong>SharePoint link:</strong>
+                      <div className="mt-1 text-blue-700 underline decoration-blue-400 break-all">
+                        {sharepointFolderUrl}
+                      </div>
+                    </div>
+                    <a
+                      href={sharepointFolderUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-white hover:bg-blue-700 transition-colors"
+                    >
+                      <FolderOpen className="h-4 w-4" />
+                      Open SharePoint Folder
+                    </a>
+                  </div>
+                </div>
+              </Card>
+            ) : (
+              categories.map(category => {
               const items = checklist.filter(item => item.document_category === category);
               const categoryReceived = items.filter(item => item.is_received).length;
               
@@ -509,7 +546,7 @@ export default function ClientPortal() {
                   </div>
                 </Card>
               );
-            })}
+            }))}
             
             {categories.length === 0 && (
               <Card className="p-8 text-center">
