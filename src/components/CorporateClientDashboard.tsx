@@ -201,7 +201,8 @@ export default function CorporateClientDashboard() {
             id: selectedCorporate.corporate_id,
             name: selectedCorporate.name,
             contact: selectedCorporate.contact_person_name || '',
-            email: selectedCorporate.contact_person_email
+            email: selectedCorporate.contact_person_email,
+            sharepoint_folder_url: selectedCorporate.sharepoint_folder_url
           }}
           onBack={() => setSelectedCorporate(null)}
         />

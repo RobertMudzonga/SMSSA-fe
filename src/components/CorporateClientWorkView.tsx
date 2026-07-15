@@ -21,6 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { API_BASE } from '@/lib/api';
 import CaseFormModal from './CaseFormModal';
 import ProjectFormModal from './ProjectFormModal';
+import CorporatePermitApplication from './CorporatePermitApplication';
 import { format } from 'date-fns';
 
 interface Case {
@@ -65,6 +66,7 @@ interface CorporateClient {
   contact: string;
   email?: string;
   employees?: number;
+  sharepoint_folder_url?: string;
 }
 
 export default function CorporateClientWorkView({
@@ -75,7 +77,7 @@ export default function CorporateClientWorkView({
   onBack: () => void;
 }) {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<'all' | 'cases' | 'projects'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'cases' | 'projects' | 'permit'>('all');
   const [cases, setCases] = useState<Case[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -292,7 +294,7 @@ export default function CorporateClientWorkView({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
@@ -304,12 +306,23 @@ export default function CorporateClientWorkView({
             Back to Corporate Clients
           </Button>
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="text-3xl font-bold text-gray-900">
             {corporateClient.name} - Visa & Legal Work
           </h1>
           <p className="text-gray-500 mt-1">Manage projects and legal cases</p>
         </div>
+        {corporateClient.sharepoint_folder_url && (
+          <div className="flex-shrink-0">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => window.open(corporateClient.sharepoint_folder_url, '_blank')}
+            >
+              View documents
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -410,6 +423,16 @@ export default function CorporateClientWorkView({
           >
             Legal Cases ({cases.length})
           </button>
+          <button
+            onClick={() => setActiveTab('permit')}
+            className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+              activeTab === 'permit'
+                ? 'border-teal-600 text-teal-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            Corporate Permit
+          </button>
         </div>
 
         <div className="flex gap-4">
@@ -437,7 +460,9 @@ export default function CorporateClientWorkView({
 
       {/* Work Items List */}
       <div className="space-y-3">
-        {loading ? (
+        {activeTab === 'permit' ? (
+          <CorporatePermitApplication corporateClient={{ id: corporateClient.id, name: corporateClient.name }} />
+        ) : loading ? (
           <Card className="p-8 text-center text-gray-500">
             Loading work items...
           </Card>

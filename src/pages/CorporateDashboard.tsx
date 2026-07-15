@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Building2, Users, FileText, Loader2, Lock, AlertCircle, Scale, Calendar, Plus, Upload, Briefcase } from 'lucide-react';
+import { Building2, Users, FileText, Loader2, Lock, AlertCircle, Scale, Calendar, Plus, Upload, Briefcase, ShieldCheck } from 'lucide-react';
 import { API_BASE } from '@/lib/api';
 import CorporateReportsView from '@/components/CorporateReportsView';
 import EmployeeVisasTracker from '@/components/EmployeeVisasTracker';
+import CorporatePermitApplication from '@/components/CorporatePermitApplication';
 import CaseCreationModalCorporate from '@/components/CaseCreationModalCorporate';
 import DocumentUploadCorporate from '@/components/DocumentUploadCorporate';
 
@@ -28,7 +29,7 @@ export default function CorporateDashboard() {
   const [casesLoading, setCasesLoading] = useState(false);
   
   // View state
-  const [activeTab, setActiveTab] = useState<'overview' | 'cases' | 'visas' | 'reports'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'cases' | 'visas' | 'reports' | 'permit'>('overview');
   
   // Modal states
   const [showCaseCreationModal, setShowCaseCreationModal] = useState(false);
@@ -192,7 +193,7 @@ export default function CorporateDashboard() {
             <h1 className="text-3xl font-bold tracking-tight">{companyInfo?.name}</h1>
             <p className="text-slate-400 mt-1">Corporate Client Dashboard</p>
           </div>
-          <div className="mt-4 md:mt-0 flex gap-4 text-sm">
+          <div className="mt-4 md:mt-0 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 text-sm">
              <div className="bg-slate-800 px-4 py-2 rounded-lg">
                 <span className="text-slate-400 block pb-1">Total Items</span>
                 <span className="font-semibold text-lg">{(cases.length + projects.length) || 0}</span>
@@ -203,6 +204,11 @@ export default function CorporateDashboard() {
                   {(cases.filter(c => c.case_status === 'active').length + projects.filter(p => !['Completed', 'Closed'].includes(p.status)).length) || 0}
                 </span>
              </div>
+             {companyInfo?.sharepoint_folder_url && (
+               <Button size="sm" variant="outline" onClick={() => window.open(companyInfo.sharepoint_folder_url, '_blank')}>
+                 Upload documents
+               </Button>
+             )}
           </div>
         </div>
       </div>
@@ -246,6 +252,15 @@ export default function CorporateDashboard() {
             >
               <FileText className="h-4 w-4" />
               Reports
+            </button>
+            <button
+              onClick={() => setActiveTab('permit')}
+              className={`flex items-center gap-2 px-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
+                activeTab === 'permit' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <ShieldCheck className="h-4 w-4" />
+              Permit Application
             </button>
           </div>
         </div>
@@ -471,6 +486,16 @@ export default function CorporateDashboard() {
           </div>
         )}
 
+        {/* PERMIT APPLICATION TAB */}
+        {activeTab === 'permit' && (
+          <div className="space-y-6">
+             <CorporatePermitApplication
+               corporateClient={{ id: companyInfo?.corporate_id, name: companyInfo?.name }}
+               isClientPortal={true}
+               sharepointUrl={companyInfo?.sharepoint_folder_url}
+             />
+          </div>
+        )}
 
       </div>
 

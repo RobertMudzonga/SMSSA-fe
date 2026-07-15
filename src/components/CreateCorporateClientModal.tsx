@@ -18,6 +18,10 @@ export default function CreateCorporateClientModal({
 }: CreateCorporateClientModalProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [created, setCreated] = useState<null | {
+    corporate_client: any;
+    access_link?: string;
+  }>(null);
   const [formData, setFormData] = useState({
     name: '',
     company_registration_number: '',
@@ -54,7 +58,7 @@ export default function CreateCorporateClientModal({
     }
 
     setLoading(true);
-    try {
+      try {
       const response = await apiFetch(`/corporate-clients`, {
         method: 'POST',
         headers: {
@@ -68,29 +72,9 @@ export default function CreateCorporateClientModal({
       if (!response.ok) {
         throw new Error(result.error || 'Failed to create corporate client');
       }
-
-      toast({
-        title: 'Success',
-        description: `${formData.name} has been created successfully`,
-      });
-
-      setFormData({
-        name: '',
-        company_registration_number: '',
-        industry: '',
-        address: '',
-        sharepoint_folder_url: '',
-        contact_person_name: '',
-        contact_person_email: '',
-        contact_person_phone: '',
-        max_users: 10,
-        subscription_start: new Date().toISOString().split('T')[0],
-        subscription_end: '',
-        notes: ''
-      });
-
-      onSuccess();
-      onClose();
+      // keep created info visible so admin can copy the link/token
+      setCreated({ corporate_client: result.corporate_client || result, access_link: result.access_link });
+      toast({ title: 'Created', description: `${formData.name} has been created` });
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -100,6 +84,15 @@ export default function CreateCorporateClientModal({
       console.error('Error creating corporate client:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({ title: 'Copied', description: `${label} copied to clipboard` });
+    } catch (e) {
+      toast({ title: 'Error', description: `Failed to copy ${label}`, variant: 'destructive' });
     }
   };
 
@@ -281,21 +274,47 @@ export default function CreateCorporateClientModal({
           </div>
 
           <div className="flex justify-end gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="bg-teal-600 hover:bg-teal-700"
-              disabled={loading}
-            >
-              {loading ? 'Creating...' : 'Create Corporate Client'}
-            </Button>
+            {!created ? (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  disabled={loading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-teal-600 hover:bg-teal-700"
+                  disabled={loading}
+                >
+                  {loading ? 'Creating...' : 'Create Corporate Client'}
+                </Button>
+              </>
+            ) : (
+              <div className="w-full">
+                <div className="bg-white p-4 rounded border mb-3">
+                  <div className="text-sm text-gray-700">Access Link</div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Input readOnly value={created.access_link || ''} />
+                    <Button variant="ghost" onClick={() => copyToClipboard(created.access_link || '', 'Access link')}>Copy</Button>
+                  </div>
+                </div>
+
+                <div className="bg-white p-4 rounded border mb-3">
+                  <div className="text-sm text-gray-700">Access Token</div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Input readOnly value={created.corporate_client?.access_token || ''} />
+                    <Button variant="ghost" onClick={() => copyToClipboard(created.corporate_client?.access_token || '', 'Access token')}>Copy</Button>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button variant="ghost" onClick={() => { onSuccess(); onClose(); }}>Done</Button>
+                </div>
+              </div>
+            )}
           </div>
         </form>
       </DialogContent>
