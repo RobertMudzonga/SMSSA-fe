@@ -59,6 +59,33 @@ export default function CorporatePermitApplication({
 
   useEffect(() => {
     fetchPermit();
+
+    const handlePermitRefresh = (event: Event) => {
+      const customEvent = event as CustomEvent<{ corporateClientId?: number }>;
+      if (customEvent.detail?.corporateClientId && customEvent.detail.corporateClientId !== corporateClient.id) {
+        return;
+      }
+      fetchPermit();
+    };
+
+    const handleStorageRefresh = (event: StorageEvent) => {
+      if (event.key === 'smssa_permit_refresh' && event.newValue) {
+        const parts = event.newValue.split('-');
+        const refreshedClientId = Number(parts[parts.length - 1]);
+        if (!Number.isNaN(refreshedClientId) && refreshedClientId !== corporateClient.id) {
+          return;
+        }
+        fetchPermit();
+      }
+    };
+
+    window.addEventListener('corporate-permit-refresh', handlePermitRefresh as EventListener);
+    window.addEventListener('storage', handleStorageRefresh);
+
+    return () => {
+      window.removeEventListener('corporate-permit-refresh', handlePermitRefresh as EventListener);
+      window.removeEventListener('storage', handleStorageRefresh);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [corporateClient.id]);
 
@@ -104,10 +131,10 @@ export default function CorporatePermitApplication({
     }
 
     return {
-      id: data.id,
+      id: data.permit_id ?? data.id,
       corporate_client_id: corporateClient.id,
       steps: data.steps.map((s: any, i: number) => ({
-        id: s.id ?? i + 1,
+        id: s.permit_step_id ?? s.id ?? i + 1,
         title: s.title ?? DEFAULT_STEPS[i] ?? `Step ${i + 1}`,
         completed: !!s.completed,
         completed_by: s.completed_by ?? null,
@@ -161,6 +188,10 @@ export default function CorporatePermitApplication({
           body: JSON.stringify({ completed: step.completed, completed_by: step.completed_by }),
         });
       }
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('smssa_permit_refresh', `${Date.now()}-${corporateClient.id}`);
+        window.dispatchEvent(new CustomEvent('corporate-permit-refresh', { detail: { corporateClientId: corporateClient.id } }));
+      }
       toast({ title: 'Updated', description: `${step.title} marked ${step.completed ? 'done' : 'not done'}` });
     } catch (err) {
       // ignore
@@ -195,6 +226,11 @@ export default function CorporatePermitApplication({
           },
           body: JSON.stringify({ content: note.content, author_role: note.author_role, author_name: note.author_name }),
         });
+        await fetchPermit();
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('smssa_permit_refresh', `${Date.now()}-${corporateClient.id}`);
+          window.dispatchEvent(new CustomEvent('corporate-permit-refresh', { detail: { corporateClientId: corporateClient.id } }));
+        }
       }
       toast({ title: 'Note added', description: 'Your note has been added' });
     } catch (err) {
