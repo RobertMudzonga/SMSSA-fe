@@ -250,7 +250,7 @@ export default function CorporatePermitApplication({
         <div>
           <h2 className="text-lg font-bold">Corporate Permit Application</h2>
           {isClient && (
-            <p className="text-sm text-yellow-700 mt-2">Client read-only mode: you can view steps and add comments, but only managers can mark steps as done.</p>
+            <p className="text-sm text-yellow-700 mt-2"></p>
           )}
         </div>
         {sharepointUrl && (
